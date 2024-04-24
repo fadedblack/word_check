@@ -1,0 +1,2 @@
+this is a shorter version of the original file.
+This is a text file.
