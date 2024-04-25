@@ -1,17 +1,21 @@
 mod asst;
 
 // Why is it taking so much time??
-// Reading just the first word
+// Known words list is not a good list
+// Make so that it reads on ascii_characters
 fn main() -> Result<(), std::io::Error> {
-    let mut book = asst::therock::Book::new("./src/example1.txt");    
-    book.open_file().unwrap();
-    let mut cont = Vec::new();
-   book.read_file(&mut cont);
+    use std::time::Instant;
+    let now = Instant::now();
 
+    let mut contents = Vec::new();
+    let path = "./src/Metamorphosis.txt";
+    let mut book = asst::therock::Book::new(&path, &mut contents);
+    book.get_words();
 
-    for chars in cont {
-        print!("{} ", chars);
+    for val in &contents {
+        println!("{:?}", std::str::from_utf8(val).unwrap());
     }
-    //println!("{contents}");
+    let elapsed = now.elapsed();
+    println!("Elapsed: {:.2?}", elapsed);
     Ok(())
 }
