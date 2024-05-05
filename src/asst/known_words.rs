@@ -11,7 +11,7 @@ impl  KnownWords {
     }
 
     fn get_known_words() -> Vec<String> {
-        let contents = std::fs::read_to_string("./src/input/training.txt").expect("Error: Known Word List couldn't be read");
+        let contents = std::fs::read_to_string("./src/input/google10.txt").expect("Error: Known Word List couldn't be read");
         let lines: Vec<String> = contents.lines().map(|line| line.to_string()).collect();
 
         lines

@@ -1,4 +1,5 @@
 use crate::asst::known_words::KnownWords;
+use std::ascii::AsciiExt;
 use std::fs::File;
 use std::io::Read;
 
@@ -6,7 +7,7 @@ pub struct Book<'a> {
     path: &'a str,
     contents: Vec<u8>,
     new_words: &'a mut Vec<String>,
-    known_words: Vec<String>,
+    all_words: Vec<String>,
     current_pos: usize,
 }
 
@@ -14,13 +15,13 @@ impl<'a> Book<'a> {
     pub fn new(path: &'a str, new_words: &'a mut Vec<String>) -> Self {
         let contents = Vec::new();
         let current_pos = 0;
-        let known_words = KnownWords::new().contents;
+        let all_words = KnownWords::new().contents;
         Self {
             path,
             contents,
             new_words,
             current_pos,
-            known_words,
+            all_words,
         }
     }
 
@@ -33,15 +34,17 @@ impl<'a> Book<'a> {
     }
 
     pub fn get_words(&mut self) {
-        let _ = self.open_file();
+        self.open_file();
         while !self.is_at_end() {
             let mut word = self.get_word().to_ascii_lowercase();
 
-            if Self::is_valid_word_len(&word) && word.is_ascii() && self.is_checked_word(&word) {
+            if Self::is_valid_word_len(&word)
+                && word.is_ascii()
+                && self.is_checked_word(&word)
+                && self.is_known_word(&word) == false
+            {
                 word = self.get_new_word(&word);
-                if word != "" {
-                    self.new_words.push(word);
-                }
+                self.new_words.push(word);
             }
         }
     }
@@ -54,29 +57,39 @@ impl<'a> Book<'a> {
         }
     }
 
+    // @Refactor: Can refactor this shit
     fn get_word(&mut self) -> String {
         let mut buffer = String::new();
         for index in self.current_pos..self.contents.len() {
-            if self.peek(index) == ' ' {
-                self.current_pos += 1;
-                return buffer;
-            } else if self.peek(index).is_ascii_punctuation() {
-                self.current_pos += 1;
-                return buffer;
-            } else if self.is_at_end() {
-                self.current_pos += 1;
-                return buffer;
-            } else if self.is_escape_sq() {
-                self.current_pos += 1;
-                return buffer;
-            } else if self.peek(index).is_ascii_digit() {
-                self.current_pos += 1;
-            } else {
-                buffer.push(self.peek(index));
-                self.current_pos += 1;
+            if buffer.len() > 0 {
+                if self.peek(index) == ' ' {
+                    self.current_pos += 1;
+                    return buffer;
+                } else if self.peek(index).is_ascii_punctuation() {
+                    self.current_pos += 1;
+                    return buffer;
+                } else if self.is_at_end() {
+                    return buffer;
+                } else if self.is_escape_sq() {
+                    self.current_pos += 1;
+                    return buffer;
+                } else if self.peek(index).is_ascii_digit() {
+                    self.current_pos += 1;
+                } else {
+                    buffer.push(self.peek(index));
+                    self.current_pos += 1;
+                }
+            }else {
+                if self.peek(index).is_ascii() {
+                    buffer.push(self.peek(index));
+                    self.current_pos += 1;
+                } else {
+                    self.current_pos += 1;
+                }
             }
         }
-        return buffer;
+        buffer.clear();
+        return '\0'.to_string();
     }
 
     fn is_at_end(&self) -> bool {
@@ -97,19 +110,6 @@ impl<'a> Book<'a> {
         return true;
     }
 
-    // @Cleanup: This function is not needed.
-    // Can directly call is_present_word.
-    //fn is_new_word(&self, word: &Vec<u8>) -> bool {
-    //    if self
-    //        .known_words
-    //        .contains(&std::str::from_utf8(word).unwrap().to_string())
-    //    {
-    //        false
-    //    } else {
-    //        true
-    //    }
-    //}
-
     fn is_escape_sq(&self) -> bool {
         match self.contents[self.current_pos] {
             b'\n' => true,
@@ -123,25 +123,55 @@ impl<'a> Book<'a> {
         }
     }
 
-    fn get_new_word(&self, word: &str) -> String {
-        let mut found = 0;
-        for known_word in &self.known_words {
-            if let Some(char_index) = known_word.find(word) {
+    // @Cleanup: Doing same thing as is_known_word 
+    fn is_known_word(&self, word: &str) -> bool {
+        let mut new_word = true;
+        for known_word in &self.all_words {
+            if let Some(char_index) = known_word.find(&word) {
                 if char_index == 0 && word.len() == known_word.len() {
-                    return word.to_string();
+                    return new_word;
                 } else {
                     if char_index == 0 {
-                        if word[known_word.len()-1..] == "ed".to_string() {
-                            word.to_string().pop();
-                            word.to_string().pop();
-                            return word.to_string();
+                        let last_pos = word.len() - 1;
+                        let second_last= last_pos - 1;
+                        let third_last= last_pos - 2;
+
+                        if word.chars().nth(third_last as usize).unwrap() == 'i' 
+                        && word.chars().nth(second_last as usize).unwrap() == 'n' 
+                        && word.chars().nth(last_pos as usize).unwrap() == 'g' {
+                            return new_word;
+                        } else if word.chars().nth(second_last as usize).unwrap() == 'e' 
+                        && word.chars().nth(last_pos as usize).unwrap() == 'd' {
+                            return new_word;
                         }
+                    } else {
+                        new_word = false;
                     }
                 }
+            } else {
+                new_word = false;
+                return new_word;
             }
         }
-        if found == 0 {
-            return "".to_string();
+        return new_word;
+    }
+
+    fn get_new_word(&self, word: &str) -> String {
+        let last_pos: usize    = word.chars().count() - 1;
+        let second_last: usize = last_pos - 1;
+        let third_last: usize  = last_pos - 2;
+
+        if word.chars().nth(third_last).unwrap() == 'i' 
+        && word.chars().nth(second_last).unwrap() == 'n' 
+        && word.chars().nth(last_pos).unwrap() == 'g' {
+            word.to_string().pop();
+            word.to_string().pop();
+            word.to_string().pop();
+            return word.to_string();
+        } else if word.chars().nth(second_last).unwrap() == 'e' && word.chars().nth(last_pos).unwrap() == 'd' {
+            word.to_string().pop();
+            word.to_string().pop();
+            return word.to_string();
         } else {
             return word.to_string();
         }
