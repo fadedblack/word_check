@@ -1,4 +1,4 @@
-/*mod asst;
+mod asst;
 
 // To Do List:
 // ? Change the wordlist to a vector of String rather than
@@ -18,30 +18,33 @@ fn main() -> Result<(), std::io::Error> {
     let mut book = asst::therock::Book::new(&path, &mut contents);
     book.get_words();
 
+    let mut index = 1;
     for word in &contents {
-        println!("{:?}", word);
+        println!("{}: {:?}", index, word);
+        index += 1;
     }
+    contents.clear();
 
     Ok(())
 }
-*/
-use pdfplumber;
-use std::fs::File;
-use std::io::Write;
 
-fn main() {
-    let pdf_path = "D:/Books/The Metamorphosis(1971).pdf";
-    let txt_path = "./src/input/output.txt";
-
-    // Open the PDF file
-    let pdf = pdfplumber::open(pdf_path).unwrap();
-
-    // Extract the text from the PDF
-    let text = pdf.pages.iter().map(|page| page.extract_text()).collect::<Vec<_>>().join("\n");
-
-    // Write the text to the output file
-    let mut file = File::create(txt_path).unwrap();
-    file.write_all(text.as_bytes()).unwrap();
-
-    println!("PDF converted to text file: {}", txt_path);
-}
+//use pdfplumber;
+//use std::fs::File;
+//use std::io::Write;
+//
+//fn main() {
+//    let pdf_path = "D:/Books/The Metamorphosis(1971).pdf";
+//    let txt_path = "./src/input/output.txt";
+//
+//    // Open the PDF file
+//    let pdf = pdfplumber::open(pdf_path).unwrap();
+//
+//    // Extract the text from the PDF
+//    let text = pdf.pages.iter().map(|page| page.extract_text()).collect::<Vec<_>>().join("\n");
+//
+//    // Write the text to the output file
+//    let mut file = File::create(txt_path).unwrap();
+//    file.write_all(text.as_bytes()).unwrap();
+//
+//    println!("PDF converted to text file: {}", txt_path);
+//}
