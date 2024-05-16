@@ -25,13 +25,17 @@ fn main() -> Result<(), std::io::Error> {
     let mut book = asst::therock::Book::new(&path, &mut contents);
     book.get_words();
 
-    let mut index = 1;
-    for word in &contents {
-        println!("{}: {:?}", index, word);
-        index += 1;
-    }
-    contents.clear();
+    let cont = std::fs::read_to_string(path).unwrap();
+    let con : Vec<&str> = cont.split_whitespace().collect();
 
+    let mut index = 1;
+    contents.clear();
+    for ca in con {
+        for c in ca.chars(){
+            println!("{}", c);
+        }
+    }
+    //println!("{:?}",con);
     Ok(())
 }
 
