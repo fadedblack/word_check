@@ -1,8 +1,6 @@
 mod asst;
 
 // To Do List:
-// ? Change the wordlist to a vector of String rather than
-// a vector of u8.
 //
 // Write some tests
 //
@@ -11,6 +9,15 @@ mod asst;
 // Create a documentation
 //
 // ?maybe store the new_words in a database
+//
+// Word with length less than 3
+// Any names of people or places
+// - If name starts with capital letter
+// - ignore those words
+// - store the lowercase version of the same
+// - check whether the word is the same
+// - 
+//
 
 fn main() -> Result<(), std::io::Error> {
     let mut contents = Vec::new();
