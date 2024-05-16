@@ -1,4 +1,3 @@
-use crate::asst::known_words::KnownWords;
 use std::fs::File;
 use std::io::Read;
 
@@ -10,7 +9,6 @@ pub struct Book<'a> {
     path: &'a str,
     contents: Vec<u8>,
     new_words: &'a mut Vec<String>,
-    //known_words: Vec<String>,
     most_common_words : Vec<String>,
     word_frequencies : Vec<Frequency>,
     current_pos: usize,
@@ -20,7 +18,6 @@ impl<'a> Book<'a> {
     pub fn new(path: &'a str, new_words: &'a mut Vec<String>) -> Self {
         let contents = Vec::new();
         let current_pos = 0;
-        //let known_words = KnownWords::new().contents;
         let most_common_words = Vec::new();
         let word_frequencies = vec![Frequency {word : "hello".to_string(), frequency : 1}];
 
@@ -29,7 +26,6 @@ impl<'a> Book<'a> {
             contents,
             new_words,
             current_pos,
-            //known_words,
             word_frequencies,
             most_common_words,
         }
