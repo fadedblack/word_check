@@ -50,7 +50,7 @@ impl<'a> Book {
     }
 
 
-    fn get_valid_word(&self, word : &String) -> String {
+    fn get_valid_word(&self, word : &str) -> String {
 
         let valid_word = word;
         
