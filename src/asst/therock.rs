@@ -1,31 +1,31 @@
 #[derive(PartialEq)]
 enum Flags {
-    HYPHEN,
+//    HYPHEN,
     NULL,
     VALID,
     INVALID,
 }
+
+/*
 struct Frequency {
     word      : String,
     frequency : usize,
 }
-pub struct Book<'a> {
-    path: &'a str,
+*/
+
+pub struct Book {
     contents: Vec<String>,
-    new_words: &'a mut Vec<&'a str>,
-    current_pos: usize,
+    new_words: Vec<String>,
 }
 
-impl<'a> Book<'a> {
-    pub fn new(path: &'a str, new_words: &'a mut Vec<&'a str>) -> Self {
+impl<'a> Book {
+    pub fn new(path: &'a str) -> Self {
         let contents = Self::open_file(path);
-        let current_pos = 0;
+        let new_words = Vec::new();
 
         Self {
-            path,
             contents,
             new_words,
-            current_pos,
         }
     }
 
@@ -38,20 +38,21 @@ impl<'a> Book<'a> {
         contents
     }
 
-    pub fn get_words(&mut self) {
-        for mut words in &self.contents {
-            words = &self.get_valid_word(words);
+    pub fn get_words(&mut self) -> Vec<String> {
+        for words in &self.contents {
+            let word = &self.get_valid_word(words);
 
-            if self.check_conditions(words) {
-                self.new_words.push(words);
+            if self.check_conditions(word) {
+                self.new_words.push(word.to_string());
             }
         }
+        self.new_words.to_owned()
     }
 
 
     fn get_valid_word(&self, word : &String) -> String {
 
-        let mut valid_word = word;
+        let valid_word = word;
         
         for (index,characs) in word.chars().enumerate() {
             let flag = self.check_valid_char(characs);
@@ -62,7 +63,7 @@ impl<'a> Book<'a> {
             };
         }
 
-        valid_word
+        valid_word.to_string()
     }
 
 
@@ -89,13 +90,13 @@ impl<'a> Book<'a> {
 
 
     fn check_conditions(&self, word : &str) -> bool {
-        let mut flag = false;
-        flag = Self::is_valid_word_len(&word) && word.is_ascii() && !self.is_checked_word(&word) && !self.is_noun(&word);
-        return flag;
+        let flag = Self::is_valid_word_len(&word) && word.is_ascii() && !self.is_checked_word(&word) && !self.is_noun(&word);
+
+        flag
     }
 
 
-    fn is_noun(&mut self, word : &str) -> bool {
+    fn is_noun(&self, word : &str) -> bool {
         if word.chars().nth(0).unwrap().is_ascii_uppercase(){
             //self.most_common_words.push(word.to_lowercase());
             return true;
@@ -103,26 +104,14 @@ impl<'a> Book<'a> {
         return false;
     }
 
+
     fn is_checked_word(&self, word: &str) -> bool {
-        if self.new_words.contains(&word) {
+        if self.new_words.contains(&word.to_string()) {
             true
         } else {
             false
         }
     }
-
-
-    fn is_at_end(&self) -> bool {
-        if self.current_pos >= self.contents.len() {
-            return true;
-        }
-
-        return false;
-    }
-
-    //fn peek(&self, index: usize) -> char {
-    //    self.contents[index] as char
-    //}
 
 
     fn is_valid_word_len(word: &str) -> bool {

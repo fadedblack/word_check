@@ -20,22 +20,11 @@ mod asst;
 //
 
 fn main() -> Result<(), std::io::Error> {
-    let mut contents = Vec::new();
     let path = "./src/input/Metamorphosis.txt";
-    let mut book = asst::therock::Book::new(&path, &mut contents);
-    book.get_words();
+    let mut book = asst::therock::Book::new(&path);
+    let contents = book.get_words();
 
-    let cont = std::fs::read_to_string(path).unwrap();
-    let con : Vec<&str> = cont.split_whitespace().collect();
-
-    let mut index = 1;
-    contents.clear();
-    for ca in con {
-        for c in ca.chars(){
-            println!("{}", c);
-        }
-    }
-    //println!("{:?}",con);
+    println!("{:?}", contents);
     Ok(())
 }
 
