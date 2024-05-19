@@ -1,6 +1,3 @@
-use std::any::type_name_of_val;
-
-#[allow(unused)]
 mod asst;
 
 // To Do List:
@@ -23,12 +20,12 @@ mod asst;
 //
 
 fn main() -> Result<(), std::io::Error> {
-    let path = "./src/input/Metamorphosis.txt";
-    let file_cont = std::fs::read_to_string(path).unwrap();
-    //let mut book = asst::therock::Book::new(&path);
-    //let contents = book.get_words();
-    let words : Vec<char> = file_cont.chars().collect();
-    println!("{:?}", type_name_of_val(&words));
+    let path = "./src/input/temp.txt";
+    //let file_cont = std::fs::read_to_string(path).unwrap();
+    let mut book = asst::therock::Book::new(&path);
+    let contents = book.get_words();
+    //let words : Vec<char> = file_cont.chars().collect();
+    println!("{:?}",contents);
     Ok(())
 }
 

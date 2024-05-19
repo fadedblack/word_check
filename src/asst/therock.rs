@@ -1,13 +1,3 @@
-use std::str::EncodeUtf16;
-
-#[derive(PartialEq)]
-enum Flags {
-//    HYPHEN,
-    NULL,
-    VALID,
-    INVALID,
-}
-
 /*
 struct Frequency {
     word      : String,
@@ -22,8 +12,8 @@ pub struct Book {
     end_pos : usize,
 }
 
-impl<'a> Book {
-    pub fn new(path: &'a str) -> Self {
+impl Book {
+    pub fn new(path: &str) -> Self {
         let contents = Self::open_file(path);
         let new_words = Vec::new();
         let current_pos = 0;
@@ -49,71 +39,84 @@ impl<'a> Book {
     pub fn get_words(&mut self) -> Vec<String> {
         
         while self.current_pos < self.end_pos {
-            let word = Self::get_valid_word();
+            let word = self.get_valid_word();
 
-            if self.check_conditions(word) {
+            if !self.checked_word(&word) && Self::is_valid_word_len(&word) {
                 self.new_words.push(word.to_string());
             }
-            self.new_words.to_owned()
         }
+        self.new_words.to_owned()
     }
 
 
-    fn get_valid_word(&self) -> String {
+    fn get_valid_word(&mut self) -> String {
 
         let mut valid_word = String::new();
-        
+
         let mut chars = self.contents[self.current_pos];
-        while !self.check_conditions(chars) {
-            valid_word.push(chars);
+
+        while !self.is_end_word_char() {
+
+            if self.check_valid_char(chars) {
+
+                self.current_pos += 1;
+                valid_word.push(chars);
+
+            }else if chars.is_ascii_uppercase() {
+
+                self.current_pos += 1;
+                
+                while !self.is_end_word_char() {
+                    self.current_pos += 1;
+                }
+            }
+        
+            self.current_pos += 1;
         }
 
         valid_word
     }
 
 
-    fn check_valid_char(&self, chars : char) -> Flags {
+    fn is_end_word_char(&self) -> bool {
         
-        let mut flag = Flags::NULL;
+        let mut flag = false;
+        if self.current_pos >= self.end_pos {flag = true}
 
-        if chars == '-' {
-            flag == Flags::INVALID;
-        } else if chars.is_ascii_punctuation() {
-            flag == Flags::INVALID;
-        } else if Self::is_escape_sq(chars) {
-            flag == Flags::INVALID;
-        } else if chars.is_ascii_digit() {
-            flag == Flags::INVALID;
-        }
-       
-        if flag != Flags::NULL {
-            flag = Flags::VALID;
-        }
+        let chars = self.contents[self.current_pos];
+
+        if chars.is_whitespace() {flag = true}
+        else if Self::is_punctuation(chars) {flag = true}
+        else if chars == '-' {flag = false}
+        else {flag = false}
 
         return flag;
+
     }
 
 
-    fn check_conditions(&self, chars : char) -> bool {
-        let flag = true;
-
-
-
-        flag
-    }
-
-
-    fn is_noun(&self, word : &str) -> bool {
-        if word.chars().nth(0).unwrap().is_ascii_uppercase(){
-            //self.most_common_words.push(word.to_lowercase());
-            return true;
+    fn is_punctuation(chars : char) -> bool {
+    
+        match chars {
+            '-' => false,
+            _ if chars.is_ascii_punctuation() => true,
+            _ if chars.is_ascii_control() => true,
+            _ => false,
         }
-        return false;
     }
 
 
-    fn is_checked_word(&self, word: &str) -> bool {
-        if self.new_words.contains(&word.to_string()) {
+    fn check_valid_char(&self, chars : char) -> bool {
+        
+        if chars.is_ascii_uppercase() {false}
+        else if chars.is_ascii_lowercase() {true}
+        else {false} 
+        
+    }
+
+
+    fn checked_word(&self, word: &str) -> bool {
+        if self.new_words.contains(&word.to_string()){
             true
         } else {
             false
@@ -127,19 +130,5 @@ impl<'a> Book {
         }
 
         return true;
-    }
-
-
-    fn is_escape_sq(chars : char) -> bool {
-        match chars {
-            '\n' => true,
-            '\t' => true,
-            '\r' => true,
-            '\\' => true,
-            '\"' => true,
-            '\'' => true,
-            '\0' => true,
-            _ => false,
-        }
     }
 }
