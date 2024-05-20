@@ -44,6 +44,7 @@ impl Book {
             if !self.checked_word(&word) && Self::is_valid_word_len(&word) {
                 self.new_words.push(word.to_string());
             }
+            self.current_pos += 1;
         }
         self.new_words.to_owned()
     }
@@ -55,23 +56,21 @@ impl Book {
 
         let mut chars = self.contents[self.current_pos];
 
-        while !self.is_end_word_char() {
+        while !self.is_end_word_char() && !self.is_at_end() {
 
             if self.check_valid_char(chars) {
-
-                self.current_pos += 1;
                 valid_word.push(chars);
-
-            }else if chars.is_ascii_uppercase() {
-
+            }
+            else {
                 self.current_pos += 1;
-                
+
                 while !self.is_end_word_char() {
                     self.current_pos += 1;
                 }
             }
         
             self.current_pos += 1;
+            chars = self.contents[self.current_pos];
         }
 
         valid_word
@@ -94,6 +93,13 @@ impl Book {
 
     }
 
+
+    fn is_at_end(&self) -> bool {
+        if self.current_pos < self.end_pos {
+            return true;
+        }
+        return false;
+    }
 
     fn is_punctuation(chars : char) -> bool {
     
@@ -125,7 +131,7 @@ impl Book {
 
 
     fn is_valid_word_len(word: &str) -> bool {
-        if word.len() >= 1 && word.len() <= 3 {
+        if word.len() >= 0 && word.len() <= 3 {
             return false;
         }
 
