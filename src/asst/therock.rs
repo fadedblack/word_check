@@ -38,7 +38,7 @@ impl Book {
 
     pub fn get_words(&mut self) -> Vec<String> {
         
-        while self.current_pos < self.end_pos {
+        while !self.is_at_end() {
             let word = self.get_valid_word();
 
             if !self.checked_word(&word) && Self::is_valid_word_len(&word) {
@@ -56,9 +56,9 @@ impl Book {
 
         let mut chars = self.contents[self.current_pos];
 
-        while !self.is_end_word_char() && !self.is_at_end() {
+        while !self.is_end_word_char() {
 
-            if self.check_valid_char(chars) {
+            if Self::check_valid_char(chars) {
                 valid_word.push(chars);
             }
             else {
@@ -68,26 +68,57 @@ impl Book {
                     self.current_pos += 1;
                 }
             }
-        
+
             self.current_pos += 1;
-            chars = self.contents[self.current_pos];
+            if !self.is_at_end() {chars = self.contents[self.current_pos]};
         }
 
-        valid_word
+
+        if valid_word.contains("-"){
+            self.current_pos += 1;
+            if !self.is_at_end() {chars = self.contents[self.current_pos]};
+
+            valid_word.pop();
+
+            while !self.is_end_word_char() {
+
+                if Self::check_valid_char(chars) {
+                    valid_word.push(chars);
+                }
+                else {
+                    self.current_pos += 1;
+
+                    while !self.is_end_word_char() {
+                        self.current_pos += 1;
+                    }
+                }
+
+                self.current_pos += 1;
+                if !self.is_at_end() {chars = self.contents[self.current_pos]};
+
+            }
+
+            return valid_word;
+        } else {
+            return valid_word;
+        }
+
+
     }
 
 
     fn is_end_word_char(&self) -> bool {
         
         let mut flag = false;
-        if self.current_pos >= self.end_pos {flag = true}
+        if self.is_at_end() {flag = true}
+        else {
+            let chars = self.contents[self.current_pos];
 
-        let chars = self.contents[self.current_pos];
-
-        if chars.is_whitespace() {flag = true}
-        else if Self::is_punctuation(chars) {flag = true}
-        else if chars == '-' {flag = false}
-        else {flag = false}
+            if chars.is_whitespace() {flag = true}
+            else if Self::is_punctuation(chars) {flag = true}
+            else if chars == '-' {flag = false}
+            else {flag = false}
+        }
 
         return flag;
 
@@ -95,27 +126,28 @@ impl Book {
 
 
     fn is_at_end(&self) -> bool {
-        if self.current_pos < self.end_pos {
-            return true;
+        if self.end_pos > self.current_pos {
+            return false;
         }
-        return false;
+        return true;
     }
+
 
     fn is_punctuation(chars : char) -> bool {
     
         match chars {
             '-' => false,
-            _ if chars.is_ascii_punctuation() => true,
-            _ if chars.is_ascii_control() => true,
+            _ if chars.is_ascii_punctuation() || chars.is_ascii_control()=> true,
             _ => false,
         }
     }
 
 
-    fn check_valid_char(&self, chars : char) -> bool {
+    fn check_valid_char(chars : char) -> bool {
         
         if chars.is_ascii_uppercase() {false}
         else if chars.is_ascii_lowercase() {true}
+        else if chars == '-' {true}
         else {false} 
         
     }

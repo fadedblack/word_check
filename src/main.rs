@@ -20,12 +20,17 @@ mod asst;
 //
 
 fn main() -> Result<(), std::io::Error> {
+    let start_time = std::time::Instant::now();
+
     let path = "./src/input/Metamorphosis.txt";
     //let file_cont = std::fs::read_to_string(path).unwrap();
     let mut book = asst::therock::Book::new(&path);
     let contents = book.get_words();
     //let words : Vec<char> = file_cont.chars().collect();
     println!("{:?}",contents);
+
+    let duration = start_time.elapsed();
+    println!("{:?}",duration);
     Ok(())
 }
 
